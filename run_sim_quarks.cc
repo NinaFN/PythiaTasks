@@ -61,7 +61,7 @@ int main() {
     }
 
     // Number of events to generate per bin.
-    int N_events = 3000;
+    int N_events = 5000;
 
     int decayMap = 0;
     //int decayMap2 = 0;
@@ -162,7 +162,8 @@ int main() {
                             {   
                                 decayElec_q1 = true;
                                 elecEtas_q1.push_back(pythia.event[child].eta());
-
+                                elecCharges_q1.push_back(pythia.event[child].charge());
+        
                                 cout<<"child particle found: "<<pythia.event[child].id()<<endl;
                             }
 
@@ -170,6 +171,7 @@ int main() {
                             {   
                                 decayMuon_q1 = true;
                                 muonEtas_q1.push_back(pythia.event[child].eta());
+                                muonCharges_q1.push_back(pythia.event[child].charge());
 
                                 cout<<"child particle found: "<<pythia.event[child].id()<<endl;
                             }
@@ -181,6 +183,7 @@ int main() {
                             {
                                 decayElec_q2 = true;
                                 elecEtas_q2.push_back(pythia.event[child].eta());
+                                elecCharges_q2.push_back(pythia.event[child].charge());
                                 
                                 cout<<"child particle found: "<<pythia.event[child].id()<<endl;
                             }
@@ -189,36 +192,60 @@ int main() {
                             {
                                 decayMuon_q2 = true;
                                 muonEtas_q2.push_back(pythia.event[child].eta());
+                                muonCharges_q2.push_back(pythia.event[child].charge());
                                 
                                 cout<<"child particle found: "<<pythia.event[child].id()<<endl;
                             }
                         }
 
-                        if(decayMuon_q1 == true or decayMuon_q2 == true){decayMap = 1;}
-                        if(decayElec_q1 == true or decayElec_q2 == true){decayMap = 2;}
-                        if((decayElec_q1==true || decayElec_q2==true) && (decayMuon_q1==true || decayMuon_q2 == true)){decayMap = 3;}
-                        if(decayElec_q1==true && decayMuon_q2==true)
+                        if(decayMuon_q1==true || decayMuon_q2==true){decayMap = 1;}
+                        if(decayElec_q1==true || decayElec_q2==true){decayMap = 2;}
+                        if((decayElec_q1==true || decayElec_q2==true) && (decayMuon_q1==true || decayMuon_q2==true)){decayMap = 3;}
+                        
+                        if((decayElec_q1==true && decayMuon_q2==true))
                         {
                             decayMap=4;
+
+                            for(double elecCharge: elecCharges_q1){
+                                for (int muonCharge: muonCharges_q2){
+                                    if(elecCharge*muonCharge == -1){
+                                        decayMap=5;
+                                        //cout<<"!! e-mu pair found?"<<endl;
+                                        break;
+                                    }
+                                }
+                            }
+
                             for(double elecEta: elecEtas_q1){if(elecEta <= 0.9 && elecEta>=-0.9){barrelHit=true;}}
                             for(double muonEta: muonEtas_q2){if(muonEta >= -4.0 && muonEta<=-2.5){forwardHit=true;}}
-                            if(barrelHit==true && forwardHit==true){decayMap=5;}
-                            cout<<"!! e-mu pair found?"<<endl;
+                            if(barrelHit==true && forwardHit==true){decayMap=6;}
                         }
 
-                        if(decayElec_q2==true && decayMuon_q1==true)
+                        else if(decayElec_q2==true && decayMuon_q1==true)
                         {
                             decayMap=4;
+
+                            for(double elecCharge: elecCharges_q2){
+                                for (int muonCharge: muonCharges_q1){
+                                    if(elecCharge*muonCharge == -1){
+                                        decayMap=5;
+                                        //cout<<"!! e-mu pair found?"<<endl;
+                                        break;
+                                    }
+                                }
+                            }
+
                             for(double elecEta: elecEtas_q2){if(elecEta <= 0.9 && elecEta>=-0.9){barrelHit=true;}}
                             for(double muonEta: muonEtas_q1){if(muonEta >= -4.0 && muonEta<=-2.5){forwardHit=true;}}
-                            if(barrelHit==true && forwardHit==true){decayMap=5;}
-                            cout<<"!! e-mu pair found?"<<endl;
+                            if(barrelHit==true && forwardHit==true){decayMap=6;}
                         }
+
 
                         //pythia.event.list(true);
 
                         //binTag:event:id:pt1:pt2:eta1:eta2:phi1:phi2:decayMap
-                        quarkTuples[iBin]->Fill(iBin,iEvent,particleID,particlePt,pythia.event[i+1].pT(),particleEta,pythia.event[i+1].eta(),decayMap);                    
+                        
+                        quarkTuples[iBin]->Fill(iBin,iEvent,particleID,particlePt,pythia.event[i+1].pT(),particleEta,pythia.event[i+1].eta(),pythia.event[i].phi(),pythia.event[i+1].phi(),decayMap);                    
                         break;
                     }
 
