@@ -5,8 +5,8 @@
 #include <TNtuple.h>
 #include <cmath>
 
-void read_sim_quarks_individual_ratios() {
-    TFile *f = TFile::Open("sim_tuples_quarks_individual_save.root","READ");
+void read_sim_leps_individual_ratios() {
+    TFile *f = TFile::Open("sim_tuples_leps_individual.root","READ");
     
     
     vector<double> *binLuminocity;
@@ -25,13 +25,13 @@ void read_sim_quarks_individual_ratios() {
     int binCount = 0;
 
     //Create Hists
-    TH1F *qePtTotal = new TH1F("qe_full","Quarks produced in c#bar{c} or b#bar{b} pairs from Pythia HardQCD processes;#hat{p}_{T} (GeV/c);#frac{d#sigma}{dp_{T}} (pb/GeV/c)", 35, 0.0, 120.0);
+    TH1F *qePtTotal = new TH1F("qe_full","Electrons produced in Pythia HardQCD process collisions;#hat{p}_{T} (GeV/c);#frac{d#sigma}{dp_{T}} (pb/GeV/c)", 35, 0.0, 120.0);
     TH1F *qePtPart = new TH1F("qe_pt_part","", 35, 0.0, 120.0);
     TH1F *qePtCheckEta = new TH1F("qe_pt_check_eta",";#hat{p}_{T} (GeV/c);Ratio", 35, 0.0, 120.0);
     TH1F *qePtCheckDec = new TH1F("qe_pt_check_dec","", 35, 0.0, 120.0);
     TH1F *qePtCheckDecEta = new TH1F("qe_pt_check_dec_eta","", 35, 0.0, 120.0);
     
-    TH1F *qmPtTotal = new TH1F("qm_full","Quarks produced in c#bar{c} or b#bar{b} pairs from Pythia HardQCD processes;#hat{p}_{T} (GeV/c);#frac{d#sigma}{dp_{T}} (pb/GeV/c)", 35, 0.0, 120.0);
+    TH1F *qmPtTotal = new TH1F("qm_full","Muons produced in Pythia HardQCD process collisions;#hat{p}_{T} (GeV/c);#frac{d#sigma}{dp_{T}} (pb/GeV/c)", 35, 0.0, 120.0);
     TH1F *qmPtPart = new TH1F("qm_pt_part","", 35, 0.0, 120.0);
     TH1F *qmPtCheckEta = new TH1F("qm_pt_check_eta",";#hat{p}_{T} (GeV/c);Ratio", 35, 0.0, 120.0);
     TH1F *qmPtCheckDec = new TH1F("qm_pt_check_dec","", 35, 0.0, 120.0);
@@ -54,17 +54,17 @@ void read_sim_quarks_individual_ratios() {
         qePtTotal->Add(qePtPart);
 
         qePtPart->Reset();
-        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","etaQ<=1.5 && etaQ>=-1.5");
+        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","etaL<=0.9 && etaL>=-0.9");
         qePtPart->Scale(1/(*it), "width");
         qePtCheckEta->Add(qePtPart);
 
         qePtPart->Reset();
-        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","decayFlag==1");
+        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","parentFlag==1");
         qePtPart->Scale(1/(*it), "width");
         qePtCheckDec->Add(qePtPart);
 
         qePtPart->Reset();
-        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","decayFlag==1 && etaDecFlag==1");
+        qeTuples[binCount]->Draw("ptHat>>qe_pt_part","parentFlag==1 && etaL<=0.9 && etaL>=-0.9");
         qePtPart->Scale(1/(*it), "width");
         qePtCheckDecEta->Add(qePtPart);
 
@@ -76,17 +76,17 @@ void read_sim_quarks_individual_ratios() {
         qmPtTotal->Add(qmPtPart);
 
         qmPtPart->Reset();
-        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","etaQ<=-2 && etaQ>=-5");
+        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","etaL<=-2.5 && etaL>=-4.5");
         qmPtPart->Scale(1/(*it), "width");
         qmPtCheckEta->Add(qmPtPart);
 
         qmPtPart->Reset();
-        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","decayFlag==1");
+        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","parentFlag==1");
         qmPtPart->Scale(1/(*it), "width");
         qmPtCheckDec->Add(qmPtPart);
 
         qmPtPart->Reset();
-        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","decayFlag==1 && etaDecFlag==1");
+        qmTuples[binCount]->Draw("ptHat>>qm_pt_part","parentFlag==1 && etaL<=-2.5 && etaL>=-4.5");
         qmPtPart->Scale(1/(*it), "width");
         qmPtCheckDecEta->Add(qmPtPart);
 
@@ -95,7 +95,7 @@ void read_sim_quarks_individual_ratios() {
 
     ////Plotting
     // qes
-    TFile *outf =  new TFile("sim_hists_individual_ratios.root", "RECREATE");
+    TFile *outf =  new TFile("sim_hists_individual_ratios_leps.root", "RECREATE");
     TCanvas *canvasQE = new TCanvas("qe_sigma","qe_sigma");
     
     TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1.0);
@@ -113,23 +113,23 @@ void read_sim_quarks_individual_ratios() {
     //qePtTotal->GetYaxis()->SetLabelSize(0.);
     qePtTotal->Draw("SAME");
 
-    qePtCheckEta->SetLineColor(kRed);
-    qePtCheckEta->SetStats(0);
-    qePtCheckEta->DrawCopy("SAME");
-
-    qePtCheckDec->SetLineColor(kGreen);
+    qePtCheckDec->SetLineColor(kRed);
     qePtCheckDec->SetStats(0);
     qePtCheckDec->DrawCopy("SAME");
+
+    qePtCheckEta->SetLineColor(kGreen);
+    qePtCheckEta->SetStats(0);
+    qePtCheckEta->DrawCopy("SAME");
 
     qePtCheckDecEta->SetLineColor(kBlue);
     qePtCheckDecEta->SetStats(0);
     qePtCheckDecEta->DrawCopy("SAME");
 
     auto legendqe = new TLegend();
-    legendqe->AddEntry(qePtTotal,"All","l");
-    legendqe->AddEntry(qePtCheckEta,"Quark produced with -1.5<#eta_{quark}<1.5","l");
-    legendqe->AddEntry(qePtCheckDec,"Quark produced, decays to e","l");
-    legendqe->AddEntry(qePtCheckDecEta,"Quark produced, decays to e with -0.9<#eta_{e}<0.9","l");
+    legendqe->AddEntry(qePtTotal,"All e","l");
+    legendqe->AddEntry(qePtCheckDec,"e produced from quark pair","l");
+    legendqe->AddEntry(qePtCheckEta,"e with -0.9<#eta_{e}<0.9","l");
+    legendqe->AddEntry(qePtCheckDecEta,"e produced from quark pair with -0.9<#eta_{e}<0.9","l");
     
     legendqe->Draw("SAME");
 
@@ -152,7 +152,7 @@ void read_sim_quarks_individual_ratios() {
 
     qePtCheckEta->Divide(qePtTotal);
     qePtCheckEta->SetStats(0);
-    qePtCheckEta->SetAxisRange(0,0.85,"Y");
+    qePtCheckEta->SetAxisRange(0,1,"Y");
     qePtCheckEta->DrawCopy();
 
     qePtCheckDec->Divide(qePtTotal);
@@ -183,23 +183,23 @@ void read_sim_quarks_individual_ratios() {
     qmPtTotal->SetStats(0);
     qmPtTotal->Draw("SAME");
 
-    qmPtCheckEta->SetLineColor(kRed);
-    qmPtCheckEta->SetStats(0);
-    qmPtCheckEta->DrawCopy("SAME");
-
-    qmPtCheckDec->SetLineColor(kGreen);
+    qmPtCheckDec->SetLineColor(kRed);
     qmPtCheckDec->SetStats(0);
     qmPtCheckDec->DrawCopy("SAME");
+
+    qmPtCheckEta->SetLineColor(kGreen);
+    qmPtCheckEta->SetStats(0);
+    qmPtCheckEta->DrawCopy("SAME");
 
     qmPtCheckDecEta->SetLineColor(kBlue);
     qmPtCheckDecEta->SetStats(0);
     qmPtCheckDecEta->DrawCopy("SAME");
 
     auto legendqm = new TLegend();
-    legendqm->AddEntry(qmPtTotal,"All","l");
-    legendqm->AddEntry(qmPtCheckEta,"Quark produced with -5<#eta_{quark}<-2","l");
-    legendqm->AddEntry(qmPtCheckDec,"Quark produced, decays to #mu","l");
-    legendqm->AddEntry(qmPtCheckDecEta,"Quark produced, decays to #mu with -4.5<#eta_{#mu}<-2.5","l");
+    legendqm->AddEntry(qmPtTotal,"All #mu","l");
+    legendqm->AddEntry(qmPtCheckDec,"#mu produced from heavy quark pair","l");
+    legendqm->AddEntry(qmPtCheckEta,"#mu with -4.5<#eta_{#mu}<-2.5","l");
+    legendqm->AddEntry(qmPtCheckDecEta,"#mu produced from heavy quark pair with -4.5<#eta_{#mu}<-2.5","l");
     
     legendqm->Draw("SAME");
 
@@ -223,7 +223,7 @@ void read_sim_quarks_individual_ratios() {
 
     qmPtCheckEta->Divide(qmPtTotal);
     qmPtCheckEta->SetStats(0);
-    qmPtCheckEta->SetAxisRange(0,0.35,"Y");
+    qmPtCheckEta->SetAxisRange(0,1,"Y");
     qmPtCheckEta->DrawCopy();
 
     qmPtCheckDec->Divide(qmPtTotal);
